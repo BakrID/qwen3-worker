@@ -34,4 +34,4 @@ COPY src/handler.py .
 
 ENV PYTHONUNBUFFERED=1
 
-CMD ["python", "-u", "handler.py"]
+ENTRYPOINT ["python", "-u", "handler.py"]
