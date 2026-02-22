@@ -1,19 +1,33 @@
 import runpod
+import logging
+import sys
 from vllm import AsyncLLMEngine, AsyncEngineArgs, SamplingParams
 from vllm.utils import random_uuid
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+    stream=sys.stdout,
+)
+log = logging.getLogger(__name__)
+
 MODEL_PATH = "/model"
 
-engine_args = AsyncEngineArgs(
-    model=MODEL_PATH,
-    dtype="auto",          # picks up FP8 weights automatically
-    quantization="fp8",
-    max_model_len=8192,
-    gpu_memory_utilization=0.90,
-    enforce_eager=False,
-)
-
-engine = AsyncLLMEngine.from_engine_args(engine_args)
+log.info("Initializing vLLM engine from %s", MODEL_PATH)
+try:
+    engine_args = AsyncEngineArgs(
+        model=MODEL_PATH,
+        dtype="auto",          # picks up FP8 weights automatically
+        quantization="fp8",
+        max_model_len=8192,
+        gpu_memory_utilization=0.90,
+        enforce_eager=False,
+    )
+    engine = AsyncLLMEngine.from_engine_args(engine_args)
+    log.info("vLLM engine ready")
+except Exception as exc:
+    log.exception("Failed to initialize vLLM engine: %s", exc)
+    sys.exit(1)
 
 
 def build_prompt(messages: list[dict]) -> str:
